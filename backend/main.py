@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from uuid import uuid4
 from datetime import datetime
@@ -12,7 +13,7 @@ import uvicorn
 # Initialize FastAPI app
 app = FastAPI()
 
-# Add CORS middleware
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,8 +22,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Setup templates directory
+# Setup templates and static file directories
 templates = Jinja2Templates(directory="templates")
+app.mount("/assets", StaticFiles(directory="assets"), name="assets")  # Proper static file serving
 
 # File paths
 USER_DATA_FILE = "users.json"
@@ -53,34 +55,32 @@ class BookingWithId(Booking):
 bookings = []
 users = []
 
+# Load data from JSON files
 def load_data():
     global bookings, users
     if os.path.exists(USER_DATA_FILE):
-        with open(USER_DATA_FILE) as f:
-            try:
+        try:
+            with open(USER_DATA_FILE) as f:
                 users = json.load(f)
-            except:
-                users = []
+        except json.JSONDecodeError:
+            users = []
     if os.path.exists(BOOKING_DATA_FILE):
-        with open(BOOKING_DATA_FILE) as f:
-            try:
+        try:
+            with open(BOOKING_DATA_FILE) as f:
                 bookings = json.load(f)
-            except:
-                bookings = []
+        except json.JSONDecodeError:
+            bookings = []
+
+# Save data to JSON files
+def save_data():
+    with open(USER_DATA_FILE, 'w') as f:
+        json.dump(users, f, indent=2)
+    with open(BOOKING_DATA_FILE, 'w') as f:
+        json.dump(bookings, f, indent=2)
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
-
-@app.route('/assets/<path:path>')
-def serve_assets(path):
-    return send_from_directory('assets', path)
-
-def save_data():
-    with open(USER_DATA_FILE, 'w') as f:
-        json.dump(users, f)
-    with open(BOOKING_DATA_FILE, 'w') as f:
-        json.dump(bookings, f)
 
 @app.post("/register")
 async def register_user(user: User):
@@ -124,9 +124,10 @@ async def delete_booking(booking_id: str):
     save_data()
     return booking
 
-# Load data at startup
+# Load existing data
 load_data()
 
+# Run the app if this file is the main program
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
