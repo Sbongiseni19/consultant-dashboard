@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from uuid import uuid4
+from fastapi import FastAPI
 from datetime import datetime
 
 # Initialize FastAPI app
@@ -61,6 +62,12 @@ def load_data():
                 bookings = json.load(f)
             except:
                 bookings = []
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello from Heroku!"}
 
 def save_data():
     with open(USER_DATA_FILE, 'w') as f:
