@@ -4,15 +4,17 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from uuid import uuid4
+from fastapi import FastAPI
 from datetime import datetime
+import uvicorn
 
 # Initialize FastAPI app
 app = FastAPI()
 
-# Add CORS middleware
+# Add CORS middleware right after app is created
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can later restrict this
+    allow_origins=["*"],  # You can later restrict this to 'http://localhost:5500' or your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -116,3 +118,7 @@ async def delete_booking(booking_id: str):
 
 # Load data when app starts
 load_data()
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))  # Get the port from Heroku's environment or use 8000 if not defined
+    uvicorn.run(app, host="0.0.0.0", port=port)
