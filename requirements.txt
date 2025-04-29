@@ -32,7 +32,6 @@ orjson==3.10.15
 packaging==24.2
 pipwin==0.5.2
 pluggy==1.5.0
-PyAudio==0.2.14
 pydantic==2.10.6
 pydantic-extra-types==2.10.3
 pydantic-settings==2.8.1
