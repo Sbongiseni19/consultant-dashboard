@@ -4,16 +4,15 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from uuid import uuid4
-from fastapi import FastAPI
 from datetime import datetime
 
 # Initialize FastAPI app
 app = FastAPI()
 
-# Add CORS middleware right after app is created
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can later restrict this to 'http://localhost:5500' or your frontend domain
+    allow_origins=["*"],  # You can later restrict this
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,8 +61,6 @@ def load_data():
                 bookings = json.load(f)
             except:
                 bookings = []
-
-app = FastAPI()
 
 @app.get("/")
 def read_root():
