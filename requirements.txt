@@ -1,5 +1,5 @@
 kivy==2.2.1
-pyaudio==0.2.14
+sounddevice==0.4.4
 SpeechRecognition==3.14.2
 flask==2.2.2
 fastapi==0.115.11
