@@ -2,234 +2,228 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smart Banking System</title>
     <link rel="icon" href="assets/img/favicon.png">
 
-    <!-- Vendor CSS Files -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
-    <link href="assets/vendor/aos/aos.css" rel="stylesheet">
-    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-    <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-    <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Template Main CSS File -->
-    <link href="assets/css/style.css" rel="stylesheet">
-    <link href="isitayela.css" rel="stylesheet">
+    <!-- FontAwesome (for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            padding-top: 100px;
+        }
+
+        #topbar {
+            background-color: #007bff;
+            color: white;
+            font-size: 14px;
+            padding: 5px 0;
+        }
+
+        #header {
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .navbar ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+            .navbar ul li {
+                display: inline-block;
+                margin: 0 10px;
+            }
+
+        .navbar a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .appointment-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .hero {
+            background: #f1f1f1;
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .cta {
+            background: #007bff;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .cta-btn {
+            background: #ffc107;
+            color: black;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .section-title h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- ======= Top Bar ======= -->
-    <div id="topbar" class="d-flex align-items-center fixed-top">
-        <div class="container d-flex align-items-center justify-content-center justify-content-md-between">
-            <div class="align-items-center d-none d-md-flex">
-                <i class="bi bi-clock"></i> Monday - Saturday, 8AM to 10PM
-            </div>
-            <div class="d-flex align-items-center">
-                <i class="bi bi-phone"></i> Call us now +2776 728 8529
-            </div>
+    <!-- Topbar -->
+    <div id="topbar" class="fixed-top">
+        <div class="container d-flex justify-content-between">
+            <div><i class="bi bi-clock"></i> Mon - Sat: 8AM to 10PM</div>
+            <div><i class="bi bi-phone"></i> +2776 728 8529</div>
         </div>
     </div>
 
-    <!-- ======= Header ======= -->
+    <!-- Header -->
     <header id="header" class="fixed-top">
-        <div class="container d-flex align-items-center">
-            <a href="index.html" class="logo me-auto">
-                <img src="assets/img/logo.png" alt="Smart Banking Logo">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a href="index.html" class="logo d-flex align-items-center">
+                <img src="assets/img/logo.png" alt="Logo" style="height: 50px;" />
+                <span class="ms-2 fw-bold text-dark">Smart Banking</span>
             </a>
-
-            <nav id="navbar" class="navbar order-last order-lg-0">
-                <ul>
-                    <li><a class="nav-link scrollto" href="#hero">Home</a></li>
+            <nav class="navbar">
+                <ul class="d-flex align-items-center">
+                    <li><a href="#hero">Home</a></li>
                     <li class="dropdown">
-                        <a href="#"><span>Services</span> <i class="bi bi-chevron-down"></i></a>
-                        <ul>
+                        <a href="#">Services <i class="bi bi-chevron-down"></i></a>
+                        <ul class="dropdown-menu">
                             <li><a href="login.html">Book Appointment</a></li>
                             <li><a href="#hero">Request a Call</a></li>
-                            <li><a href="login.html">Nearby Bank Locations</a></li>
+                            <li><a href="login.html">Nearby Locations</a></li>
                             <li><a href="#">Download App</a></li>
                         </ul>
                     </li>
-                    <li><a class="nav-link scrollto" href="login.html">View Profile</a></li>
+                    <li><a href="login.html">View Profile</a></li>
                 </ul>
-                <i class="bi bi-list mobile-nav-toggle"></i>
             </nav>
-
-            <a href="login.html" class="appointment-btn scrollto"><span class="d-none d-md-inline">Get</span> Started</a>
+            <a href="login.html" class="appointment-btn">Get Started</a>
         </div>
     </header>
 
-    <!-- ======= Hero Section ======= -->
-    <section id="hero" class="d-flex align-items-center">
-        <!-- Hero content can be added here -->
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="container">
+            <h1>Welcome to Smart Banking System</h1>
+            <p>Book appointments, locate branches, and manage your profile with ease.</p>
+            <a href="#appointment" class="btn btn-primary mt-3">Book an Appointment</a>
+        </div>
     </section>
 
-    <main id="main">
-
-        <!-- ======= CTA Section ======= -->
-        <section id="cta" class="cta">
-            <div class="container" data-aos="zoom-in">
-                <div class="text-center">
-                    <h3>In an emergency? Need help now?</h3>
-                    <a class="cta-btn scrollto" href="#appointment">Make an Appointment</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- ======= Appointment Section ======= -->
-        <section id="appointment" class="appointment section-bg">
-            <div class="container" data-aos="fade-up">
-                <div class="section-title">
-                    <h2>Make an Appointment</h2>
-                </div>
-
-                <form action="forms/appointment.php" method="post" class="php-email-form" data-aos="fade-up" data-aos-delay="100">
-                    <div class="row">
-                        <div class="col-md-4 form-group">
-                            <input type="text" name="name" class="form-control" placeholder="Your Name" required>
-                        </div>
-                        <div class="col-md-4 form-group mt-3 mt-md-0">
-                            <input type="email" name="email" class="form-control" placeholder="Your Email" required>
-                        </div>
-                        <div class="col-md-4 form-group mt-3 mt-md-0">
-                            <input type="tel" name="phone" class="form-control" placeholder="Your Phone" required>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4 form-group mt-3">
-                            <input type="date" name="date" class="form-control" required>
-                        </div>
-                        <div class="col-md-4 form-group mt-3">
-                            <select name="department" class="form-select" required>
-                                <option value="">Select Bank</option>
-                                <option value="FNB">FNB</option>
-                                <option value="Capitec">Capitec</option>
-                                <option value="Standard Bank">Standard Bank</option>
-                                <option value="ABSA">ABSA</option>
-                                <option value="Tyme Bank">Tyme Bank</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 form-group mt-3">
-                            <select name="doctor" class="form-select" required>
-                                <option value="">Select Service</option>
-                                <option value="Statements">Statements</option>
-                                <option value="Card">Card</option>
-                                <option value="Transaction">Transaction</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group mt-3">
-                        <textarea name="message" class="form-control" rows="5" placeholder="Area (Enter your address for nearby banks.)"></textarea>
-                    </div>
-
-                    <div class="my-3">
-                        <div class="loading">Loading</div>
-                        <div class="error-message"></div>
-                        <div class="sent-message">Your appointment request has been sent successfully. Thank you!</div>
-                    </div>
-                    <div class="text-center"><button type="submit">Make an Appointment</button></div>
-                </form>
-            </div>
-        </section>
-
-        <!-- ======= Contact Section ======= -->
-        <section id="contact" class="contact">
-            <div class="container">
-                <div class="section-title">
-                    <h2>Contact</h2>
-                </div>
-
-                <div class="row mt-5">
-                    <div class="col-lg-6">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="info-box">
-                                    <i class="bx bx-map"></i>
-                                    <h3>Our Address</h3>
-                                    <p>148 Jonston Street, Sunnyside, Pretoria, 0083</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="info-box mt-4">
-                                    <i class="bx bx-envelope"></i>
-                                    <h3>Email Us</h3>
-                                    <p>info@smartbankingsystem.com<br>contact@smartbankingsystem.com</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="info-box mt-4">
-                                    <i class="bx bx-phone-call"></i>
-                                    <h3>Call Us</h3>
-                                    <p>+2776 728 8529</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6">
-                        <form action="forms/contact.php" method="post" class="php-email-form">
-                            <div class="row">
-                                <div class="col-md-6 form-group">
-                                    <input type="text" name="name" class="form-control" placeholder="Your Name" required>
-                                </div>
-                                <div class="col-md-6 form-group mt-3 mt-md-0">
-                                    <input type="email" name="email" class="form-control" placeholder="Your Email" required>
-                                </div>
-                            </div>
-                            <div class="form-group mt-3">
-                                <input type="text" name="subject" class="form-control" placeholder="Subject" required>
-                            </div>
-                            <div class="form-group mt-3">
-                                <textarea name="message" class="form-control" rows="7" placeholder="Message" required></textarea>
-                            </div>
-                            <div class="my-3">
-                                <div class="loading">Loading</div>
-                                <div class="error-message"></div>
-                                <div class="sent-message">Your message has been sent. Thank you!</div>
-                            </div>
-                            <div class="text-center"><button type="submit">Send Message</button></div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- ======= Footer ======= -->
-    <footer id="footer">
+    <!-- CTA -->
+    <section class="cta">
         <div class="container">
-            <div class="copyright">
-                &copy; Copyright <strong><span>Smart Banking System</span></strong>. All Rights Reserved
+            <h3>Need Help Now?</h3>
+            <a class="cta-btn" href="#appointment">Make an Appointment</a>
+        </div>
+    </section>
+
+    <!-- Appointment Section -->
+    <section id="appointment" class="py-5">
+        <div class="container">
+            <div class="section-title">
+                <h2>Make an Appointment</h2>
             </div>
-            <div class="credits">
-                Designed by <a href="#">Smart Banking System Group</a>
+            <form class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" placeholder="Your Name" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="email" class="form-control" placeholder="Your Email" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="tel" class="form-control" placeholder="Your Phone" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="date" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" required>
+                        <option value="">Select Bank</option>
+                        <option>FNB</option>
+                        <option>Capitec</option>
+                        <option>Standard Bank</option>
+                        <option>ABSA</option>
+                        <option>Tyme Bank</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" required>
+                        <option value="">Select Service</option>
+                        <option>Statements</option>
+                        <option>Card</option>
+                        <option>Transaction</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <textarea class="form-control" rows="4" placeholder="Your Address or Area"></textarea>
+                </div>
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-success px-4">Submit Appointment</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="py-5 bg-light">
+        <div class="container">
+            <div class="section-title">
+                <h2>Contact</h2>
             </div>
+            <div class="row g-4">
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-geo-alt-fill fs-2 text-primary"></i>
+                    <p>148 Jonston Street, Sunnyside, Pretoria</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-envelope-fill fs-2 text-primary"></i>
+                    <p>info@smartbankingsystem.com</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-phone-fill fs-2 text-primary"></i>
+                    <p>+2776 728 8529</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Smart Banking System. All rights reserved.</p>
+            <p>Designed by Smart Banking System Group</p>
         </div>
     </footer>
 
-    <div id="preloader"></div>
-    <a href="#" class="back-to-top d-flex align-items-center justify-content-center">
-        <i class="bi bi-arrow-up-short"></i>
-    </a>
-
-    <!-- Vendor JS Files -->
-    <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
-    <script src="assets/vendor/aos/aos.js"></script>
-    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-    <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-    <script src="assets/vendor/php-email-form/validate.js"></script>
-
-    <!-- Template Main JS File -->
-    <script src="assets/js/main.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 
