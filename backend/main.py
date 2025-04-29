@@ -1,24 +1,28 @@
 ﻿import json
 import os
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 from uuid import uuid4
-from fastapi import FastAPI
 from datetime import datetime
 import uvicorn
 
 # Initialize FastAPI app
 app = FastAPI()
 
-# Add CORS middleware right after app is created
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can later restrict this to 'http://localhost:5500' or your frontend domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Setup templates directory
+templates = Jinja2Templates(directory="templates")
 
 # File paths
 USER_DATA_FILE = "users.json"
@@ -64,9 +68,9 @@ def load_data():
             except:
                 bookings = []
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello from Heroku!"}
+@app.get("/", response_class=HTMLResponse)
+def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 def save_data():
     with open(USER_DATA_FILE, 'w') as f:
@@ -116,9 +120,9 @@ async def delete_booking(booking_id: str):
     save_data()
     return booking
 
-# Load data when app starts
+# Load data at startup
 load_data()
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))  # Get the port from Heroku's environment or use 8000 if not defined
+    port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
