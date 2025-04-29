@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard - Book Now</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-end">
+            <button id="logoutBtn" class="btn btn-danger mb-3">Logout</button>
+        </div>
+
+        <div class="card p-4 shadow">
+            <h2 id="welcomeMessage" class="text-center mb-4">Welcome!</h2>
+            <p class="text-center">Book your slot below:</p>
+
+            <form id="bookingForm">
+                <div class="mb-3">
+                    <label>Name:</label>
+                    <input type="text" id="name" class="form-control" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label>Email:</label>
+                    <input type="email" id="email" class="form-control" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label>ID Number:</label>
+                    <input type="text" id="id_number" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Bank Name:</label>
+                    <select id="selected_bank" class="form-control" required>
+                        <option value="">Select a bank</option>
+                        <option value="FNB">FNB</option>
+                        <option value="Capitec">Capitec</option>
+                        <option value="Absa">Absa</option>
+                        <option value="TymeBank">TymeBank</option>
+                        <option value="Standard Bank">Standard Bank</option>
+                        <option value="African Bank">African Bank</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Service Needed:</label>
+                    <select id="selected_service" class="form-control" required>
+                        <option value="">Select a service</option>
+                        <option value="Card Related Service">Card Related Service</option>
+                        <option value="Statement Related">Statement Related</option>
+                        <option value="Transaction(deposit/withdrawal)">Transaction (deposit/withdrawal)</option>
+                    </select>
+                </div>
+
+
+                <button type="submit" class="btn btn-primary w-100">Book Now</button>
+            </form>
+        </div>
+
+        <div class="mt-5">
+            <h2>Your Bookings:</h2>
+            <ul id="userBookings" class="list-group"></ul>
+        </div>
+    </div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = "login.html";
+        }
+
+        // Set user's name and email
+        document.getElementById('name').value = currentUser.name;
+        document.getElementById('email').value = currentUser.email;
+        document.getElementById('welcomeMessage').textContent = `Welcome ${currentUser.name}!`;
+
+        // Logout button
+        document.getElementById('logoutBtn').addEventListener('click', function () {
+            localStorage.removeItem('currentUser');
+            window.location.href = "login.html";
+        });
+
+        // Booking form submission
+        document.getElementById('bookingForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const data = {
+                name: document.getElementById('name').value,
+                id_number: document.getElementById('id_number').value,
+                email: document.getElementById('email').value,
+                selected_bank: document.getElementById('selected_bank').value,
+                selected_service: document.getElementById('selected_service').value,
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/book', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`Booking Successful!\nReference ID: ${result.id}`);
+                    document.getElementById('bookingForm').reset();
+                    document.getElementById('name').value = currentUser.name;
+                    document.getElementById('email').value = currentUser.email;
+                    loadUserBookings(); // Refresh the bookings
+                } else {
+                    let errorMessage = 'Please try again.';
+                    try {
+                        const errorResult = await response.json();
+                        errorMessage = errorResult.detail || errorMessage;
+                    } catch (e) { }
+                    alert('Booking failed: ' + errorMessage);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Something went wrong connecting to server.');
+            }
+        });
+
+        // Load user's bookings
+        async function loadUserBookings() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/bookings');
+                if (response.ok) {
+                    const allBookings = await response.json();
+                    const userBookings = allBookings.filter(booking => booking.email === currentUser.email);
+                    const list = document.getElementById('userBookings');
+                    list.innerHTML = '';
+
+                    if (userBookings.length === 0) {
+                        list.innerHTML = '<li class="list-group-item">No bookings found.</li>';
+                    } else {
+                        userBookings.forEach(b => {
+                            const item = document.createElement('li');
+                            item.className = 'list-group-item';
+                            item.innerHTML = `
+                                <strong>Bank:</strong> ${b.selected_bank}<br>
+                                <strong>Service:</strong> ${b.selected_service}<br>
+                                <strong>Date:</strong> ${b.booking_time}
+                            `;
+                            list.appendChild(item);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to load bookings:", error);
+            }
+        }
+
+        // Load bookings on page load
+        loadUserBookings();
+    </script>
+
+</body>
+</html>
