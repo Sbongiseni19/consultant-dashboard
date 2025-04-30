@@ -32,7 +32,10 @@
         h5,
         h6 {
             font-family: "Roboto", sans-serif;
-            padding: 20px 0;
+        }
+
+        h1 {
+            padding: 25px 0;
         }
 
         #preloader {
@@ -311,7 +314,7 @@
 */
         .mobile-nav-toggle {
             color: #555555;
-            font-size: 28px;
+            font-size: 20px;
             cursor: pointer;
             display: none;
             line-height: 0;
@@ -322,9 +325,9 @@
                 color: #fff;
             }
 
-        @media (max-width: 950px) {
+        @media (max-width: 900px) {
             .mobile-nav-toggle {
-                display: block;
+                display:flex;
             }
 
             .navbar ul {
@@ -334,7 +337,7 @@
 
         .navbar-mobile {
             position: fixed;
-            overflow: hidden;
+            overflow:visible;
             top: 0;
             right: 0;
             left: 0;
@@ -347,7 +350,7 @@
             .navbar-mobile .mobile-nav-toggle {
                 position: absolute;
                 top: 10px;
-                right: 10px;
+                right: 15px;
             }
 
             .navbar-mobile ul {
