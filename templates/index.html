@@ -130,14 +130,14 @@
             background: #fff;
             transition: all 0.5s;
             z-index: 997;
-            padding: 20px 0;
+            padding: 10px 10px;
             top: 40px;
             box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
         }
 
-        @media (max-width: 992px) {
+        @media (max-width: 100%) {
             #header {
-                padding: 15px 0;
+                padding: 10px 10px;
             }
         }
 
@@ -145,33 +145,15 @@
             top: 0;
         }
 
-        #header .logo {
-            font-size: 28px;
-            margin: 0;
-            padding: 0;
-            line-height: 1;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-            #header .logo a {
-                color: #555555;
-            }
-
-            #header .logo img {
-                max-height: 40px;
-            }
-
         /**
 * Appointment Button
 */
         .appointment-btn {
-            margin-left: 25px;
+            margin-left: 15px;
             background: #3fbbc0;
             color: #fff;
             border-radius: 4px;
-            padding: 8px 25px;
+            padding: 8px 20px;
             white-space: nowrap;
             transition: 0.3s;
             font-size: 14px;
@@ -186,7 +168,7 @@
         @media (max-width: 768px) {
             .appointment-btn {
                 margin: 0 15px 0 0;
-                padding: 6px 15px;
+                padding: 6px 10px;
             }
         }
 
@@ -310,7 +292,7 @@
 */
         .mobile-nav-toggle {
             color: #555555;
-            font-size: 20px;
+            font-size: 30px;
             cursor: pointer;
             display: none;
             line-height: 0;
@@ -333,7 +315,7 @@
 
         .navbar-mobile {
             position: fixed;
-            overflow:visible;
+            overflow: revert;
             top: 0;
             right: 0;
             left: 0;
@@ -415,7 +397,7 @@
 --------------------------------------------------------------*/
         #hero {
             width: 100%;
-            height: 10svh;
+            height: 20svh;
             background-color: white;
             overflow: hidden;
             position: relative;
@@ -436,7 +418,7 @@
                 background-size: cover;
                 background-position: center;
                 background-repeat: no-repeat;
-                display:flex;
+                display: flex;
                 justify-content: center;
                 align-items: flex-end;
             }
@@ -543,7 +525,7 @@
             font-size: 14px;
             letter-spacing: 1px;
             display: inline-block;
-            padding: 14px 32px;
+            padding: 14px 25px;
             border-radius: 4px;
             transition: 0.5s;
             line-height: 1;
