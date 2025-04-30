@@ -4,31 +4,171 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Banking System</title>
-    <!-- Link to Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        /* General styling */
+        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            line-height: 1.6;
         }
 
-        /* Make the topbar and header fixed at the top */
-        #topbar, #header {
+        /* Topbar */
+        #topbar {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
             position: fixed;
+            top: 0;
             width: 100%;
-            z-index: 999;
-        }
-
-        /* Adjust Hero Section */
-        #hero {
-            padding-top: 100px; /* Adjust for fixed header */
+            z-index: 100;
             text-align: center;
         }
 
+        /* Header */
+        #header {
+            background-color: #fff;
+            padding: 20px 0;
+            position: fixed;
+            top: 40px;
+            width: 100%;
+            z-index: 100;
+        }
+
+            #header .logo {
+                font-size: 1.8rem;
+                font-weight: bold;
+                color: #333;
+                text-align: center;
+            }
+
+            #header nav ul {
+                list-style: none;
+                display: flex;
+                justify-content: center;
+                padding: 0;
+            }
+
+                #header nav ul li {
+                    margin: 0 20px;
+                }
+
+                    #header nav ul li a {
+                        text-decoration: none;
+                        color: #333;
+                        font-size: 1rem;
+                        font-weight: 500;
+                    }
+
+            #header .appointment-btn {
+                background-color: #28a745;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                text-decoration: none;
+                font-weight: bold;
+                display: inline-block;
+            }
+
+        /* Hero Section */
+        #hero {
+            text-align: center;
+            padding: 150px 20px 50px;
+            background: #f5f5f5;
+        }
+
+            #hero h1 {
+                font-size: 2.5rem;
+                color: #333;
+            }
+
+            #hero p {
+                font-size: 1.2rem;
+                color: #666;
+                margin-bottom: 30px;
+            }
+
+            #hero .btn {
+                background-color: #007bff;
+                color: white;
+                padding: 12px 25px;
+                border-radius: 5px;
+                font-size: 1rem;
+                text-decoration: none;
+            }
+
+        /* Appointment Section */
+        #appointment {
+            padding: 50px 20px;
+            background: #fff;
+            text-align: center;
+        }
+
+            #appointment h2 {
+                font-size: 2rem;
+                margin-bottom: 20px;
+            }
+
+            #appointment form {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+                #appointment form input,
+                #appointment form select,
+                #appointment form textarea,
+                #appointment form button {
+                    width: 100%;
+                    padding: 12px;
+                    margin-bottom: 15px;
+                    font-size: 1rem;
+                    border-radius: 5px;
+                    border: 1px solid #ccc;
+                }
+
+                #appointment form button {
+                    background-color: #28a745;
+                    color: white;
+                    cursor: pointer;
+                }
+
+        /* Contact Section */
+        #contact {
+            background-color: #f5f5f5;
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+            #contact h2 {
+                font-size: 2rem;
+                margin-bottom: 30px;
+            }
+
+            #contact .row {
+                display: flex;
+                justify-content: center;
+                gap: 30px;
+            }
+
+            #contact .col {
+                flex: 1;
+                max-width: 200px;
+            }
+
+        /* Footer */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
             #hero h1 {
                 font-size: 2rem;
             }
@@ -37,96 +177,50 @@
                 font-size: 1rem;
             }
 
-            #hero .btn {
-                font-size: 1rem;
+            #appointment form {
+                max-width: 90%;
             }
 
-        /* Adjust CTA section */
-        .cta h3 {
-            font-size: 1.5rem;
-        }
-
-        .cta-btn {
-            font-size: 1.2rem;
-        }
-
-        /* Appointment Section */
-        #appointment form input,
-        #appointment form select,
-        #appointment form textarea {
-            width: 100%; /* Ensure full width on mobile */
-        }
-
-        /* Footer */
-        footer {
-            padding: 30px;
-            text-align: center;
-            background-color: #f9f9f9;
-        }
-
-        /* Mobile Styles with Media Queries */
-        @media (max-width: 768px) {
-            /* Stack the form fields vertically */
-            #appointment form .col-md-4 {
-                width: 100%;
-                margin-bottom: 15px;
+            #header .logo {
+                font-size: 1.5rem;
             }
 
-            /* Adjust the topbar for smaller screens */
-            #topbar .container {
+            #header nav ul {
                 flex-direction: column;
-                text-align: center;
+                align-items: center;
             }
 
-            #header .navbar {
-                display: none; /* Hide navbar for mobile */
+                #header nav ul li {
+                    margin: 10px 0;
+                }
+
+            #contact .row {
+                flex-direction: column;
             }
 
-            #header .appointment-btn {
-                display: block;
-                margin-top: 15px;
-            }
-
-            #hero h1 {
-                font-size: 1.5rem;
-            }
-
-            #hero p {
-                font-size: 1rem;
-            }
-
-            .cta-btn {
-                font-size: 1rem;
-            }
-
-            .section-title h2 {
-                font-size: 1.5rem;
-            }
-
-            /* Make footer links more accessible on mobile */
-            .col-md-4 {
+            #contact .col {
                 margin-bottom: 20px;
-            }
-
-            .cta-btn {
-                padding: 15px 30px;
             }
         }
 
         @media (max-width: 576px) {
-            /* Adjust font size further for very small devices */
             #hero h1 {
-                font-size: 1.2rem;
+                font-size: 1.6rem;
             }
 
-            .cta-btn {
+            #hero p {
                 font-size: 0.9rem;
             }
 
             #appointment form input,
             #appointment form select,
-            #appointment form textarea {
+            #appointment form textarea,
+            #appointment form button {
                 font-size: 0.9rem;
+            }
+
+            footer {
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -134,134 +228,81 @@
 <body>
 
     <!-- Topbar -->
-    <div id="topbar" class="fixed-top">
-        <div class="container d-flex justify-content-between">
-            <div><i class="bi bi-clock"></i> Mon - Sat: 8AM to 10PM</div>
-            <div><i class="bi bi-phone"></i> +2776 728 8529</div>
-        </div>
+    <div id="topbar">
+        <p>Mon - Sat: 8AM to 10PM | <i class="bi bi-phone"></i> +2776 728 8529</p>
     </div>
 
     <!-- Header -->
-    <header id="header" class="fixed-top">
-        <div class="container d-flex align-items-center justify-content-between">
-            <a href="index.html" class="logo d-flex align-items-center">
-                <span class="ms-2 fw-bold text-dark">Smart Banking System</span>
-            </a>
-            <nav class="navbar">
-                <ul class="d-flex align-items-center">
-                    <li><a href="#hero">Home</a></li>
-                    <li class="dropdown">
-                        <a href="#">Services <i class="bi bi-chevron-down"></i></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="login.html">Book Appointment</a></li>
-                            <li><a href="#hero">Request a Call</a></li>
-                            <li><a href="login.html">Nearby Locations</a></li>
-                            <li><a href="#">Download App</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="login.html">View Profile</a></li>
-                </ul>
-            </nav>
-            <a href="login.html" class="appointment-btn">Get Started</a>
-        </div>
+    <header id="header">
+        <div class="logo">Smart Banking System</div>
+        <nav>
+            <ul>
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#appointment">Book Appointment</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="login.html" class="appointment-btn">Get Started</a>
     </header>
 
     <!-- Hero Section -->
-    <section id="hero" class="hero">
-        <div class="container">
-            <h1>Welcome to Smart Banking System</h1>
-            <p>Book appointments, locate branches, and manage your profile with ease.</p>
-            <a href="#appointment" class="btn btn-primary mt-3">Book an Appointment</a>
-        </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="cta">
-        <div class="container">
-            <h3>In an emergency? Need Help Now?</h3>
-            <a class="cta-btn" href="#appointment">Make an Appointment</a>
-        </div>
+    <section id="hero">
+        <h1>Welcome to Smart Banking System</h1>
+        <p>Book appointments, locate branches, and manage your profile with ease.</p>
+        <a href="#appointment" class="btn">Book an Appointment</a>
     </section>
 
     <!-- Appointment Section -->
-    <section id="appointment" class="py-5">
-        <div class="container">
-            <div class="section-title">
-                <h2>Make an Appointment</h2>
-            </div>
-            <form class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" class="form-control" placeholder="Your Name" required>
-                </div>
-                <div class="col-md-4">
-                    <input type="email" class="form-control" placeholder="Your Email" required>
-                </div>
-                <div class="col-md-4">
-                    <input type="tel" class="form-control" placeholder="Your Phone" required>
-                </div>
-                <div class="col-md-4">
-                    <input type="date" class="form-control" required>
-                </div>
-                <div class="col-md-4">
-                    <select class="form-select" required>
-                        <option value="">Select Bank</option>
-                        <option>FNB</option>
-                        <option>Capitec</option>
-                        <option>Standard Bank</option>
-                        <option>ABSA</option>
-                        <option>Tyme Bank</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <select class="form-select" required>
-                        <option value="">Select Service</option>
-                        <option>Statements</option>
-                        <option>Card</option>
-                        <option>Transaction</option>
-                    </select>
-                </div>
-                <div class="col-12">
-                    <textarea class="form-control" rows="4" placeholder="Your Address or Area"></textarea>
-                </div>
-                <div class="col-12 text-center">
-                    <button type="submit" class="btn btn-success px-4">Submit Appointment</button>
-                </div>
-            </form>
-        </div>
+    <section id="appointment">
+        <h2>Make an Appointment</h2>
+        <form>
+            <input type="text" placeholder="Your Name" required>
+            <input type="email" placeholder="Your Email" required>
+            <input type="tel" placeholder="Your Phone" required>
+            <input type="date" required>
+            <select required>
+                <option value="">Select Bank</option>
+                <option>FNB</option>
+                <option>Capitec</option>
+                <option>Standard Bank</option>
+                <option>ABSA</option>
+                <option>Tyme Bank</option>
+            </select>
+            <select required>
+                <option value="">Select Service</option>
+                <option>Statements</option>
+                <option>Card</option>
+                <option>Transaction</option>
+            </select>
+            <textarea placeholder="Your Address or Area" rows="4" required></textarea>
+            <button type="submit">Submit Appointment</button>
+        </form>
     </section>
 
-    <!-- Contact -->
-    <section id="contact" class="py-5 bg-light">
-        <div class="container">
-            <div class="section-title">
-                <h2>Contact</h2>
+    <!-- Contact Section -->
+    <section id="contact">
+        <h2>Contact</h2>
+        <div class="row">
+            <div class="col">
+                <i class="bi bi-geo-alt-fill fs-2 text-primary"></i>
+                <p>148 Jonston Street, Sunnyside, Pretoria</p>
             </div>
-            <div class="row g-4">
-                <div class="col-md-4 text-center">
-                    <i class="bi bi-geo-alt-fill fs-2 text-primary"></i>
-                    <p>148 Jonston Street, Sunnyside, Pretoria</p>
-                </div>
-                <div class="col-md-4 text-center">
-                    <i class="bi bi-envelope-fill fs-2 text-primary"></i>
-                    <p>info@smartbankingsystem.com</p>
-                </div>
-                <div class="col-md-4 text-center">
-                    <i class="bi bi-phone-fill fs-2 text-primary"></i>
-                    <p>+2776 728 8529</p>
-                </div>
+            <div class="col">
+                <i class="bi bi-envelope-fill fs-2 text-primary"></i>
+                <p>info@smartbankingsystem.com</p>
+            </div>
+            <div class="col">
+                <i class="bi bi-phone-fill fs-2 text-primary"></i>
+                <p>+2776 728 8529</p>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <div class="container">
-            <p>&copy; 2025 Smart Banking System. All rights reserved.</p>
-            <p>Designed by Smart Banking System Group</p>
-        </div>
+        <p>&copy; 2025 Smart Banking System. All rights reserved.</p>
+        <p>Designed by Smart Banking System Group</p>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
