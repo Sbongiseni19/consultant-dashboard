@@ -3,8 +3,10 @@
     "",
     "\\templates",
     "\\templates\\assets",
-    "\\templates\\assets\\js"
+    "\\templates\\assets\\vendor",
+    "\\templates\\assets\\vendor\\fontawesome-free",
+    "\\templates\\assets\\vendor\\fontawesome-free\\css"
   ],
-  "SelectedNode": "\\templates\\assets\\js\\main.js",
+  "SelectedNode": "\\templates\\assets\\vendor\\fontawesome-free\\css\\all.min.css",
   "PreviewInSolutionExplorer": false
 }

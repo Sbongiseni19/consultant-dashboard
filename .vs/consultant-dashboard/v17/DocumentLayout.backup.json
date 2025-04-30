@@ -7,10 +7,6 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:templates\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\themb\\PROJECT\\consultant-dashboard\\templates\\assets\\vendor\\fontawesome-free\\css\\all.min.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:templates\\assets\\vendor\\fontawesome-free\\css\\all.min.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\themb\\PROJECT\\consultant-dashboard\\templates\\assets\\js\\main.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:templates\\assets\\js\\main.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     }
@@ -22,24 +18,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "all.min.css",
-              "DocumentMoniker": "C:\\Users\\themb\\PROJECT\\consultant-dashboard\\templates\\assets\\vendor\\fontawesome-free\\css\\all.min.css",
-              "RelativeDocumentMoniker": "templates\\assets\\vendor\\fontawesome-free\\css\\all.min.css",
-              "ToolTip": "C:\\Users\\themb\\PROJECT\\consultant-dashboard\\templates\\assets\\vendor\\fontawesome-free\\css\\all.min.css",
-              "RelativeToolTip": "templates\\assets\\vendor\\fontawesome-free\\css\\all.min.css",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABqVAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-04-30T11:50:51.447Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
               "Title": "main.js",
               "DocumentMoniker": "C:\\Users\\themb\\PROJECT\\consultant-dashboard\\templates\\assets\\js\\main.js",
               "RelativeDocumentMoniker": "templates\\assets\\js\\main.js",
@@ -47,7 +30,8 @@
               "RelativeToolTip": "templates\\assets\\js\\main.js",
               "ViewState": "AgIAAPYAAAAAAAAAAAAAABABAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-04-30T11:46:33.732Z"
+              "WhenOpened": "2025-04-30T11:46:33.732Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -57,7 +41,7 @@
               "RelativeDocumentMoniker": "templates\\index.html",
               "ToolTip": "C:\\Users\\themb\\PROJECT\\consultant-dashboard\\templates\\index.html",
               "RelativeToolTip": "templates\\index.html",
-              "ViewState": "AgIAANYfAAAAAAAAAAAmwPIfAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAADAHAAAAAAAAAAAmwCkGAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
               "WhenOpened": "2025-04-30T11:39:53.988Z",
               "EditorCaption": ""
