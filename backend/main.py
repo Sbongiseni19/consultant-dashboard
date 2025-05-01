@@ -85,20 +85,29 @@ def save_data():
 
 # Add these new endpoints to your existing FastAPI app
 
-@app.post("/login")
-async def login_user(login_data: LoginData):
-    for user in users:
-        if user["email"] == login_data.email and user["password"] == login_data.password:
-            return {"user": {"name": user["name"], "email": user["email"]}}
-    raise HTTPException(status_code=401, detail="Invalid email or password")
+
+
+
 
 @app.post("/register")
 async def register_user(user: User):
-    if any(u['email'] == user.email for u in users):
-        raise HTTPException(status_code=400, detail="Email already registered")
+    for u in users:
+        if u['email'] == user.email:
+            raise HTTPException(status_code=400, detail="Email already registered")
     users.append(user.dict())
     save_data()
     return {"message": "User registered successfully"}
+
+@app.post("/login")
+async def login_user(login_data: LoginData):
+    if login_data.email == "admin@gmail.com" and login_data.password == "123":
+        return {"message": "Admin login successful", "role": "admin"}
+
+
+    for u in users:
+        if u['email'] == login_data.email and u['password'] == login_data.password:
+            return {"message": "User login successful", "role": "user", "name": u['name'], "email": u['email']}
+    raise HTTPException(status_code=401, detail="Invalid email or password")
 
 
 
