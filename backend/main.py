@@ -97,6 +97,20 @@ async def login_page(request: Request):
 async def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
+@app.post("/api/login")
+async def login_user(login_data: LoginData):
+    for user in users:
+        if user["email"] == login_data.email and user["password"] == login_data.password:
+            return {"user": {"name": user["name"], "email": user["email"]}}
+    raise HTTPException(status_code=401, detail="Invalid email or password")
+
+@app.post("/api/register")
+async def register_user(user: User):
+    if any(u['email'] == user.email for u in users):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    users.append(user.dict())
+    save_data()
+    return {"message": "User registered successfully"}
 
 
 
