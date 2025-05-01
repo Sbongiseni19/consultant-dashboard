@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from uuid import uuid4
 from datetime import datetime
 import uvicorn
+from fastapi.staticfiles import StaticFiles
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -82,24 +83,14 @@ def save_data():
     with open(BOOKING_DATA_FILE, 'w') as f:
         json.dump(bookings, f)
 
-@app.post("/register")
-async def register_user(user: User):
-    for u in users:
-        if u['email'] == user.email:
-            raise HTTPException(status_code=400, detail="Email already registered")
-    users.append(user.dict())
-    save_data()
-    return {"message": "User registered successfully"}
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
 
-@app.post("/login")
-async def login_user(login_data: LoginData):
-    if login_data.email == "admin@gmail.com" and login_data.password == "123":
-        return {"message": "Admin login successful", "role": "admin"}
+@app.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
 
-    for u in users:
-        if u['email'] == login_data.email and u['password'] == login_data.password:
-            return {"message": "User login successful", "role": "user", "name": u['name'], "email": u['email']}
-    raise HTTPException(status_code=401, detail="Invalid email or password")
 
 @app.post("/book", response_model=BookingWithId)
 async def book_slot(booking: Booking):
