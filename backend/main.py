@@ -9,7 +9,6 @@ from uuid import uuid4
 from datetime import datetime
 import uvicorn
 from fastapi.staticfiles import StaticFiles
-from passlib.context import CryptContext
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -25,7 +24,6 @@ app.add_middleware(
 
 # Setup templates directory
 templates = Jinja2Templates(directory="templates")
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # File paths
 USER_DATA_FILE = "users.json"
@@ -89,12 +87,10 @@ def save_data():
 
 @app.post("/login")
 async def login_user(login_data: LoginData):
-    user = next((u for u in users if u['email'] == login_data.email), None)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    if user['password'] != login_data.password:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    return {"message": "Login successful", "user": user}
+    for user in users:
+        if user["email"] == login_data.email and user["password"] == login_data.password:
+            return {"user": {"name": user["name"], "email": user["email"]}}
+    raise HTTPException(status_code=401, detail="Invalid email or password")
 
 @app.post("/register")
 async def register_user(user: User):
@@ -102,7 +98,8 @@ async def register_user(user: User):
         raise HTTPException(status_code=400, detail="Email already registered")
     users.append(user.dict())
     save_data()
-    return {"message": "Registration successful", "user": user}
+    return {"message": "User registered successfully"}
+
 
 
 
