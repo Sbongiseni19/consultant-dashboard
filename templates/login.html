@@ -29,22 +29,41 @@
     <script>
         document.getElementById("loginForm").addEventListener("submit", async function (e) {
             e.preventDefault();
+
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
+            const loginMessage = document.getElementById("loginMessage");
+            const submitBtn = e.target.querySelector('button[type="submit"]');
 
-            const response = await fetch("http://localhost:8000/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            });
+            try {
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging in...';
 
-            const result = await response.json();
+                const response = await fetch("http://localhost:8000/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
 
-            if (response.ok) {
-                document.getElementById("loginMessage").textContent = result.message;
-                // Redirect to dashboard or homepage if needed
-            } else {
-                document.getElementById("loginMessage").textContent = result.detail;
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Store user data in localStorage
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    // Redirect to dashboard
+                    window.location.href = "user_dashboard.html";
+                } else {
+                    loginMessage.textContent = result.detail || "Login failed";
+                    loginMessage.className = "text-danger text-center mt-2";
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                loginMessage.textContent = "Network error. Please try again.";
+                loginMessage.className = "text-danger text-center mt-2";
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Login";
             }
         });
     </script>

@@ -72,6 +72,13 @@
             window.location.href = "login.html";
         }
 
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                window.location.href = "login.html";
+                return;
+            }
+
         // Set user's name and email
         document.getElementById('name').value = currentUser.name;
         document.getElementById('email').value = currentUser.email;
@@ -82,6 +89,8 @@
             localStorage.removeItem('currentUser');
             window.location.href = "login.html";
         });
+
+        
 
         // Booking form submission
         document.getElementById('bookingForm').addEventListener('submit', async function (e) {

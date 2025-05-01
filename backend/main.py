@@ -9,6 +9,7 @@ from uuid import uuid4
 from datetime import datetime
 import uvicorn
 from fastapi.staticfiles import StaticFiles
+from passlib.context import CryptContext
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -24,6 +25,7 @@ app.add_middleware(
 
 # Setup templates directory
 templates = Jinja2Templates(directory="templates")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # File paths
 USER_DATA_FILE = "users.json"
@@ -83,13 +85,25 @@ def save_data():
     with open(BOOKING_DATA_FILE, 'w') as f:
         json.dump(bookings, f)
 
-@app.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+# Add these new endpoints to your existing FastAPI app
 
-@app.get("/register", response_class=HTMLResponse)
-async def register_page(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
+@app.post("/login")
+async def login_user(login_data: LoginData):
+    user = next((u for u in users if u['email'] == login_data.email), None)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    if user['password'] != login_data.password:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    return {"message": "Login successful", "user": user}
+
+@app.post("/register")
+async def register_user(user: User):
+    if any(u['email'] == user.email for u in users):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    users.append(user.dict())
+    save_data()
+    return {"message": "Registration successful", "user": user}
+
 
 
 @app.post("/book", response_model=BookingWithId)
