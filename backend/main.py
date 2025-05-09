@@ -1,18 +1,13 @@
 ﻿import json
 import os
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from uuid import uuid4
 from datetime import datetime
 import uvicorn
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
-from fastapi.responses import HTMLResponse, JSONResponse
-
-
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -60,7 +55,7 @@ users = []
 
 def load_data():
     global bookings, users
-    # Load existing users
+    # Load users
     if os.path.exists(USER_DATA_FILE):
         with open(USER_DATA_FILE) as f:
             try:
@@ -70,18 +65,17 @@ def load_data():
     else:
         users = []
 
-    # ✅ Add default admin user if not already present
+    # Add default admin
     admin_exists = any(u["email"] == "admin@gmail.com" for u in users)
     if not admin_exists:
-        admin_user = {
+        users.append({
             "name": "Admin",
             "email": "admin@gmail.com",
             "password": "123"
-        }
-        users.append(admin_user)
-        save_data()  # Save updated list including admin
+        })
+        save_data()
 
-    # Load existing bookings
+    # Load bookings
     if os.path.exists(BOOKING_DATA_FILE):
         with open(BOOKING_DATA_FILE) as f:
             try:
@@ -89,27 +83,15 @@ def load_data():
             except:
                 bookings = []
 
-
-@app.get("/", response_class=HTMLResponse)
-def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-@app.post("/logout")
-async def logout():
-    # Add any session-clearing logic here if applicable
-    return JSONResponse(content={"message": "Logged out successfully"})
-
-@app.route('/assets/<path:path>')
-def serve_assets(path):
-    return send_from_directory('assets', path)
-
 def save_data():
     with open(USER_DATA_FILE, 'w') as f:
         json.dump(users, f)
     with open(BOOKING_DATA_FILE, 'w') as f:
         json.dump(bookings, f)
 
-# Add these new endpoints to your existing FastAPI app
+@app.get("/", response_class=HTMLResponse)
+def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
@@ -119,15 +101,21 @@ async def login_page(request: Request):
 async def consultant_dashboard_page(request: Request):
     return templates.TemplateResponse("dashboard_consultant.html", {"request": request})
 
-
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
     return templates.TemplateResponse("user_dashboard.html", {"request": request})
 
-
 @app.get("/register", response_class=HTMLResponse)
 async def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
+
+@app.post("/api/register")
+async def register_user(user: User):
+    if any(u["email"] == user.email for u in users):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    users.append(user.dict())
+    save_data()
+    return {"message": "User registered successfully"}
 
 @app.post("/api/login")
 async def login_user(login_data: LoginData):
@@ -135,14 +123,6 @@ async def login_user(login_data: LoginData):
         if user["email"] == login_data.email and user["password"] == login_data.password:
             return {"user": {"name": user["name"], "email": user["email"]}}
     raise HTTPException(status_code=401, detail="Invalid email or password")
-
-@app.post("/api/register")
-async def register_user(user: User):
-    if any(u['email'] == user.email for u in users):
-        raise HTTPException(status_code=400, detail="Email already registered")
-    users.append(user.dict())
-    save_data()
-    return {"message": "User registered successfully"}
 
 @app.post("/book", response_model=BookingWithId)
 async def book_slot(booking: Booking):
@@ -160,12 +140,16 @@ async def get_bookings():
 @app.delete("/bookings/{booking_id}", response_model=BookingWithId)
 async def delete_booking(booking_id: str):
     global bookings
-    booking = next((b for b in bookings if b['id'] == booking_id), None)
+    booking = next((b for b in bookings if b["id"] == booking_id), None)
     if booking is None:
         raise HTTPException(status_code=404, detail="Booking not found")
-    bookings = [b for b in bookings if b['id'] != booking_id]
+    bookings = [b for b in bookings if b["id"] != booking_id]
     save_data()
     return booking
+
+@app.post("/logout")
+async def logout():
+    return JSONResponse(content={"message": "Logged out successfully"})
 
 # Load data at startup
 load_data()
