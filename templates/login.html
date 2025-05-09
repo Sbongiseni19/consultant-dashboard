@@ -48,7 +48,8 @@
 
                 if (response.ok) {
                     localStorage.setItem('currentUser', JSON.stringify(result.user));
-                    window.location.href = "user_dashboard.html";
+                    window.location.href = "/dashboard";
+
                 } else {
                     loginMessage.textContent = result.detail || "Login failed";
                     loginMessage.className = "text-danger text-center mt-2";
