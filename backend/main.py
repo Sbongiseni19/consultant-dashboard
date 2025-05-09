@@ -85,10 +85,6 @@ def save_data():
 
 # Add these new endpoints to your existing FastAPI app
 
-
-
-
-
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -111,8 +107,6 @@ async def register_user(user: User):
     users.append(user.dict())
     save_data()
     return {"message": "User registered successfully"}
-
-
 
 @app.post("/book", response_model=BookingWithId)
 async def book_slot(booking: Booking):

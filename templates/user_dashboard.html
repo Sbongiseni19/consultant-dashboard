@@ -55,7 +55,6 @@
                     </select>
                 </div>
 
-
                 <button type="submit" class="btn btn-primary w-100">Book Now</button>
             </form>
         </div>
@@ -73,100 +72,57 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (!currentUser) {
+            document.getElementById('name').value = currentUser.name;
+            document.getElementById('email').value = currentUser.email;
+            document.getElementById('welcomeMessage').textContent = `Welcome ${currentUser.name}!`;
+
+            document.getElementById('logoutBtn').addEventListener('click', function () {
+                localStorage.removeItem('currentUser');
                 window.location.href = "login.html";
-                return;
-            }
+            });
 
-        // Set user's name and email
-        document.getElementById('name').value = currentUser.name;
-        document.getElementById('email').value = currentUser.email;
-        document.getElementById('welcomeMessage').textContent = `Welcome ${currentUser.name}!`;
+            document.getElementById('bookingForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
 
-        // Logout button
-        document.getElementById('logoutBtn').addEventListener('click', function () {
-            localStorage.removeItem('currentUser');
-            window.location.href = "login.html";
-        });
+                const data = {
+                    name: document.getElementById('name').value,
+                    id_number: document.getElementById('id_number').value,
+                    email: document.getElementById('email').value,
+                    selected_bank: document.getElementById('selected_bank').value,
+                    selected_service: document.getElementById('selected_service').value,
+                };
 
-        
+                try {
+                    const response = await fetch('http://127.0.0.1:8000/book', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
 
-        // Booking form submission
-        document.getElementById('bookingForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const data = {
-                name: document.getElementById('name').value,
-                id_number: document.getElementById('id_number').value,
-                email: document.getElementById('email').value,
-                selected_bank: document.getElementById('selected_bank').value,
-                selected_service: document.getElementById('selected_service').value,
-            };
-
-            try {
-                const response = await fetch('http://127.0.0.1:8000/book', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    alert(`Booking Successful!\nReference ID: ${result.id}`);
-                    document.getElementById('bookingForm').reset();
-                    document.getElementById('name').value = currentUser.name;
-                    document.getElementById('email').value = currentUser.email;
-                    loadUserBookings(); // Refresh the bookings
-                } else {
-                    let errorMessage = 'Please try again.';
-                    try {
-                        const errorResult = await response.json();
-                        errorMessage = errorResult.detail || errorMessage;
-                    } catch (e) { }
-                    alert('Booking failed: ' + errorMessage);
+                    if (response.ok) {
+                        const result = await response.json();
+                        alert(`Booking Successful!\nReference ID: ${result.id}`);
+                        document.getElementById('bookingForm').reset();
+                        loadUserBookings();
+                    } else {
+                        alert('Booking failed: Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Something went wrong connecting to server.');
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Something went wrong connecting to server.');
-            }
-        });
+            });
 
-        // Load user's bookings
-        async function loadUserBookings() {
-            try {
-                const response = await fetch('http://127.0.0.1:8000/bookings');
-                if (response.ok) {
+            async function loadUserBookings() {
+                try {
+                    const response = await fetch('http://127.0.0.1:8000/bookings');
                     const allBookings = await response.json();
                     const userBookings = allBookings.filter(booking => booking.email === currentUser.email);
                     const list = document.getElementById('userBookings');
                     list.innerHTML = '';
-
                     if (userBookings.length === 0) {
                         list.innerHTML = '<li class="list-group-item">No bookings found.</li>';
                     } else {
                         userBookings.forEach(b => {
                             const item = document.createElement('li');
-                            item.className = 'list-group-item';
-                            item.innerHTML = `
-                                <strong>Bank:</strong> ${b.selected_bank}<br>
-                                <strong>Service:</strong> ${b.selected_service}<br>
-                                <strong>Date:</strong> ${b.booking_time}
-                            `;
-                            list.appendChild(item);
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error("Failed to load bookings:", error);
-            }
-        }
 
-        // Load bookings on page load
-        loadUserBookings();
-    </script>
-
-</body>
-</html>
