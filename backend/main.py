@@ -89,6 +89,11 @@ def save_data():
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
+@app.get("/dashboard-consultant", response_class=HTMLResponse)
+async def consultant_dashboard_page(request: Request):
+    return templates.TemplateResponse("dashboard_consultant.html", {"request": request})
+
+
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
     return templates.TemplateResponse("user_dashboard.html", {"request": request})
