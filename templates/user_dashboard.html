@@ -76,9 +76,23 @@
             document.getElementById('email').value = currentUser.email;
             document.getElementById('welcomeMessage').textContent = `Welcome ${currentUser.name}!`;
 
-            document.getElementById('logoutBtn').addEventListener('click', function () {
-                localStorage.removeItem('currentUser');
-                window.location.href = "login.html";
+            document.getElementById('logoutBtn').addEventListener('click', async function () {
+                const confirmLogout = confirm("Are you sure you want to logout?");
+                if (confirmLogout) {
+                    try {
+                        await fetch("http://localhost:8000/logout", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            }
+                        });
+                    } catch (error) {
+                        console.warn("Server logout failed or unavailable");
+                    }
+
+                    localStorage.removeItem("currentUser");
+                    window.location.href = "/index";
+                }
             });
 
             document.getElementById('bookingForm').addEventListener('submit', async function (e) {

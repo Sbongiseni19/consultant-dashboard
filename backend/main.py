@@ -73,6 +73,11 @@ def load_data():
 def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.post("/logout")
+async def logout():
+    # Add any session-clearing logic here if applicable
+    return JSONResponse(content={"message": "Logged out successfully"})
+
 @app.route('/assets/<path:path>')
 def serve_assets(path):
     return send_from_directory('assets', path)
