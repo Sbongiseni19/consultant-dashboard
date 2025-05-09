@@ -60,18 +60,35 @@ users = []
 
 def load_data():
     global bookings, users
+    # Load existing users
     if os.path.exists(USER_DATA_FILE):
         with open(USER_DATA_FILE) as f:
             try:
                 users = json.load(f)
             except:
                 users = []
+    else:
+        users = []
+
+    # ✅ Add default admin user if not already present
+    admin_exists = any(u["email"] == "admin@gmail.com" for u in users)
+    if not admin_exists:
+        admin_user = {
+            "name": "Admin",
+            "email": "admin@gmail.com",
+            "password": "123"
+        }
+        users.append(admin_user)
+        save_data()  # Save updated list including admin
+
+    # Load existing bookings
     if os.path.exists(BOOKING_DATA_FILE):
         with open(BOOKING_DATA_FILE) as f:
             try:
                 bookings = json.load(f)
             except:
                 bookings = []
+
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
