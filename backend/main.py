@@ -9,6 +9,10 @@ from uuid import uuid4
 from datetime import datetime
 import uvicorn
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+
+
 
 # Initialize FastAPI app
 app = FastAPI()
