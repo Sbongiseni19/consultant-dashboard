@@ -108,6 +108,11 @@
 
     <!-- Dashboard -->
     <div class="container" id="dashboardView">
+
+        <div class="d-flex justify-content-end">
+            <button id="logoutBtn" class="btn btn-danger mb-3">Logout</button>
+        </div>
+
         <input type="text" id="searchInput" placeholder="Search by name or email..." onkeyup="filterTable()" style="margin-bottom: 1rem; padding: 10px; width: 100%; max-width: 300px; border-radius: 8px; border: 1px solid #ccc;">
 
         <div style="margin-bottom: 1rem;">
@@ -167,6 +172,25 @@
                 console.error('Error:', error);
             }
         }
+
+        document.getElementById('logoutBtn').addEventListener('click', async function () {
+            const confirmLogout = confirm("Are you sure you want to logout?");
+            if (confirmLogout) {
+                try {
+                    await fetch("https://mybankingapp-ed37f0d6c39a.herokuapp.com/logout", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+                } catch (error) {
+                    console.warn("Server logout failed or unavailable");
+                }
+
+                localStorage.removeItem("currentUser");
+                window.location.href = "/";
+            }
+        });
 
         async function loadAllBookings() {
             try {
