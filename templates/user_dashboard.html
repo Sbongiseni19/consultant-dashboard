@@ -80,7 +80,7 @@
                 const confirmLogout = confirm("Are you sure you want to logout?");
                 if (confirmLogout) {
                     try {
-                        await fetch("http://localhost:8000/logout", {
+                        await fetch("https://mybankingapp-ed37f0d6c39a.herokuapp.com/logout", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json"
@@ -107,7 +107,7 @@
                 };
 
                 try {
-                    const response = await fetch('http://127.0.0.1:8000/book', {
+                    const response = await fetch('hhttps://mybankingapp-ed37f0d6c39a.herokuapp.com/book', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data),
@@ -129,7 +129,7 @@
 
             async function loadUserBookings() {
                 try {
-                    const response = await fetch('http://127.0.0.1:8000/bookings');
+                    const response = await fetch('https://mybankingapp-ed37f0d6c39a.herokuapp.com/bookings');
                     const allBookings = await response.json();
                     const userBookings = allBookings.filter(booking => booking.email === currentUser.email);
                     const list = document.getElementById('userBookings');

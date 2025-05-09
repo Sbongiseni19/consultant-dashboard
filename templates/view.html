@@ -151,7 +151,7 @@
 
         async function fetchBookings() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/bookings');
+                const response = await fetch('https://mybankingapp-ed37f0d6c39a.herokuapp.com/bookings');
                 const data = await response.json();
 
                 if (response.ok) {
