@@ -68,7 +68,7 @@
                     registerMessage.textContent = "Registration successful! Redirecting to login...";
                     registerMessage.className = "text-success text-center mt-2";
                     setTimeout(() => {
-                        window.location.href = "login.html";
+                        window.location.href = "/login";
                     }, 1500);
                 } else {
                     registerMessage.textContent = result.detail || "Registration failed";

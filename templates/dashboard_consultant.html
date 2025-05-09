@@ -179,9 +179,7 @@
                 try {
                     await fetch("https://mybankingapp-ed37f0d6c39a.herokuapp.com/logout", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        }
+                        headers: { "Content-Type": "application/json" }
                     });
                 } catch (error) {
                     console.warn("Server logout failed or unavailable");
@@ -199,18 +197,18 @@
                 if (response.ok) {
                     const allBookings = await response.json();
                     const tableBody = document.querySelector('#allBookings tbody');
-                    tableBody.innerHTML = ''; // Clear previous
+                    tableBody.innerHTML = '';
 
                     allBookings.forEach(booking => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
-            <td>${booking.name}</td>
-            <td>${booking.id_number}</td>
-            <td>${booking.email}</td>
-            <td>${booking.slot}</td>
-            <td>${booking.bank_name}</td>
-            <td>${booking.service}</td>
-          `;
+                    <td>${booking.name}</td>
+                    <td>${booking.id_number}</td>
+                    <td>${booking.email}</td>
+                    <td>${booking.slot}</td>
+                    <td>${booking.bank_name}</td>
+                    <td>${booking.service}</td>
+                `;
                         tableBody.appendChild(row);
                     });
                 }
@@ -221,7 +219,6 @@
 
         loadAllBookings();
 
-        // Render table rows
         function renderTable(data) {
             const tableBody = document.querySelector("#bookingsTable tbody");
             tableBody.innerHTML = "";
@@ -229,24 +226,23 @@
             data.forEach((booking, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-              <td data-label="Name">${booking.name}</td>
-              <td data-label="ID Number">${booking.id_number}</td>
-              <td data-label="Email">${booking.email}</td>
-              <td data-label="Bank">${booking.bank}</td>
-              <td data-label="Service">${booking.service}</td>
-              <td data-label="Booking Time">${booking.booking_time}</td>
-              <td data-label="Info">
+            <td data-label="Name">${booking.name}</td>
+            <td data-label="ID Number">${booking.id_number}</td>
+            <td data-label="Email">${booking.email}</td>
+            <td data-label="Bank">${booking.bank_name}</td>
+            <td data-label="Service">${booking.service}</td>
+            <td data-label="Booking Time">${booking.slot}</td>
+            <td data-label="Info">
                 <button onclick="viewProfile(${index})">View</button>
                 <button onclick="updateStatus(${index})">Update</button>
                 <button onclick="deleteBooking(${index})">Delete</button>
-              </td>
-              <td data-label="Checked" id="checked-${index}">Pending</td>
-            `;
+            </td>
+            <td data-label="Checked" id="checked-${index}">Pending</td>
+        `;
                 tableBody.appendChild(row);
             });
         }
 
-        // Search filter
         function filterTable() {
             const input = document.getElementById("searchInput").value.toLowerCase();
             const filteredData = bookingsData.filter(
@@ -255,20 +251,18 @@
             renderTable(filteredData);
         }
 
-        // View profile (unchanged)
         function viewProfile(index) {
             const user = bookingsData[index];
             document.getElementById("profileName").innerText = user.name;
             document.getElementById("profileID").innerText = user.id_number;
             document.getElementById("profileEmail").innerText = user.email;
-            document.getElementById("profileBank").innerText = user.bank;
+            document.getElementById("profileBank").innerText = user.bank_name;
             document.getElementById("profileService").innerText = user.service;
-            document.getElementById("profileBookingTime").innerText = user.booking_time;
+            document.getElementById("profileBookingTime").innerText = user.slot;
             document.getElementById("dashboardView").style.display = "none";
             document.getElementById("profileView").style.display = "block";
         }
 
-        // Update status
         function updateStatus(index) {
             const cell = document.getElementById(`checked-${index}`);
             if (cell.innerText === 'Pending') {
@@ -276,7 +270,6 @@
             }
         }
 
-        // Delete booking (frontend-only unless backend delete is implemented)
         function deleteBooking(index) {
             if (confirm("Are you sure you want to delete this booking?")) {
                 bookingsData.splice(index, 1);
@@ -284,13 +277,11 @@
             }
         }
 
-        // Back to dashboard
         function goBack() {
             document.getElementById("dashboardView").style.display = "block";
             document.getElementById("profileView").style.display = "none";
         }
 
-        // Export to PDF
         function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -299,14 +290,13 @@
             let y = 20;
 
             bookingsData.forEach((b, i) => {
-                doc.text(`${i + 1}. ${b.name}, ${b.id_number}, ${b.email}, ${b.bank}, ${b.service}`, 10, y);
+                doc.text(`${i + 1}. ${b.name}, ${b.id_number}, ${b.email}, ${b.bank_name}, ${b.service}`, 10, y);
                 y += 10;
             });
 
             doc.save("bookings.pdf");
         }
 
-        // Export to Excel
         function exportToExcel() {
             const ws = XLSX.utils.json_to_sheet(bookingsData);
             const wb = XLSX.utils.book_new();
@@ -314,10 +304,9 @@
             XLSX.writeFile(wb, "bookings.xlsx");
         }
 
-        // Auto-refresh every 30 seconds
         setInterval(fetchBookings, 30000);
-
         fetchBookings();
+
     </script>
 
 </body>
