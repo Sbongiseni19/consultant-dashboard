@@ -14,11 +14,12 @@ from pymongo import MongoClient
 app = FastAPI()
 
 # MongoDB Atlas connection
-MONGO_URI = "mongodb+srv://banking_user:Mpendulo00%40@bankingappdb.4zq89p5.mongodb.net/BankingAppDB?retryWrites=true&w=majority"
-client = MongoClient(MONGO_URI)
-db = client["BankingAppDB"]
-users_collection = db["users"]
-bookings_collection = db["bookings"]
+connection_string = "mongodb+srv://banking_user:Mpendulo00@bankingappdb.4zq89p5.mongodb.net/?retryWrites=true&w=majority&appName=BankingAppDB"
+
+# Connect to the MongoDB Atlas cluster
+client = MongoClient(connection_string)
+db = client["bankingappdb"]  # Replace with your database name
+collection = db["users"]  # Example collection
 
 # Add CORS middleware
 app.add_middleware(
