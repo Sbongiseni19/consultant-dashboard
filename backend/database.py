@@ -1,12 +1,10 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from models import Base
+from pymongo import MongoClient
 
-DATABASE_URL = "sqlite:///./consultant.db"  # Using SQLite for now
+# MongoDB connection string
+client = MongoClient("mongodb+srv://banking_user:Mpendulo00@bankingappdb.4zq89p5.mongodb.net/?retryWrites=true&w=majority")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Define the database
+db = client.get_database("banking_app")
 
-# Create tables
-def init_db():
-    Base.metadata.create_all(bind=engine)
+# Define the user collection
+users_collection = db.get_collection("users")
