@@ -1,5 +1,6 @@
 ﻿from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
 from pymongo import MongoClient
 from bcrypt import hashpw, gensalt, checkpw
 from pydantic import BaseModel
@@ -10,6 +11,9 @@ import os
 
 # Initialize FastAPI app
 app = FastAPI()
+
+# Initialize the Jinja2Templates for rendering HTML
+templates = Jinja2Templates(directory="templates")
 
 # MongoDB Atlas connection
 connection_string = "mongodb+srv://banking_user:Mpendulo00@bankingappdb.4zq89p5.mongodb.net/?retryWrites=true&w=majority&appName=BankingAppDB"
@@ -39,28 +43,20 @@ class BookingWithId(Booking):
     id: str
     booking_time: str
 
-# Add CORS middleware (if necessary)
-# app.add_middleware(...)
+# Register index route to serve index.html
+@app.get("/", response_class=HTMLResponse)
+async def get_index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 # Registration endpoint
 @app.post("/register")
 async def register_user(user: User):
-    # Check if the email already exists
     existing_user = users_collection.find_one({"email": user.email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email is already registered")
     
-    # Hash the password using bcrypt
     hashed_password = hashpw(user.password.encode('utf-8'), gensalt())
-    
-    # Create a new user document
-    new_user = {
-        "name": user.name,
-        "email": user.email,
-        "password": hashed_password
-    }
-    
-    # Insert the user document into the MongoDB collection
+    new_user = {"name": user.name, "email": user.email, "password": hashed_password}
     users_collection.insert_one(new_user)
     
     return JSONResponse(status_code=201, content={"message": "User registered successfully"})
@@ -85,7 +81,7 @@ async def book_slot(booking: Booking):
 # Retrieve bookings
 @app.get("/bookings", response_model=list[BookingWithId])
 async def get_bookings():
-    results = list(bookings_collection.find({}, {'_id': 0}))  # Exclude _id
+    results = list(bookings_collection.find({}, {'_id': 0}))
     return results
 
 # Delete a booking
