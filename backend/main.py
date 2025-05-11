@@ -43,10 +43,30 @@ class BookingWithId(Booking):
     id: str
     booking_time: str
 
-# Register index route to serve index.html
+# Route for the homepage (index)
 @app.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+# Route for login page
+@app.get("/login", response_class=HTMLResponse)
+async def get_login(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+# Route for registration page
+@app.get("/register", response_class=HTMLResponse)
+async def get_register(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+# Route for user dashboard
+@app.get("/user_dashboard", response_class=HTMLResponse)
+async def get_user_dashboard(request: Request):
+    return templates.TemplateResponse("user_dashboard.html", {"request": request})
+
+# Route for consultant dashboard
+@app.get("/consultant_dashboard", response_class=HTMLResponse)
+async def get_consultant_dashboard(request: Request):
+    return templates.TemplateResponse("dashboard_consultant.html", {"request": request})
 
 # Registration endpoint
 @app.post("/register")
@@ -64,9 +84,17 @@ async def register_user(user: User):
 # Login endpoint
 @app.post("/api/login")
 async def login_user(login_data: LoginData):
+    # Check if email and password match the admin credentials
+    if login_data.email == "admin@gmail.com" and login_data.password == "123":
+        # Redirect to consultant dashboard if credentials match
+        return RedirectResponse(url="/consultant_dashboard")
+    
+    # Otherwise, check if the user exists in the MongoDB database
     user = users_collection.find_one({"email": login_data.email})
     if user and checkpw(login_data.password.encode('utf-8'), user["password"]):
         return {"user": {"name": user["name"], "email": user["email"]}}
+    
+    # If email or password is invalid, raise an error
     raise HTTPException(status_code=401, detail="Invalid email or password")
 
 # Booking endpoint
