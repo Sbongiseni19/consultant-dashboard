@@ -1,35 +1,54 @@
 ﻿import os
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
+from passlib.context import CryptContext
 import uvicorn
+from dotenv import load_dotenv
 
 # Initialize FastAPI app
 app = FastAPI()
+load_dotenv()
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://127.0.0.1:8000",  # local frontend
+        "http://localhost:8000",  # fallback
+        "https://mybankingapp-ed37f0d6c39a.herokuapp.com/",  # add this if deploying frontend
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Setup templates directory
-templates = Jinja2Templates(directory="templates")
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
 # MongoDB setup
 MONGO_URI = os.getenv("MONGO_URI")
+if not MONGO_URI:
+    raise RuntimeError("MONGO_URI environment variable is not set.")
 client = AsyncIOMotorClient(MONGO_URI)
 db = client["banking_db"]
 users_collection = db["users"]
 bookings_collection = db["bookings"]
+
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
 # Models
 class User(BaseModel):
@@ -79,23 +98,25 @@ async def register_user(user: User):
     existing = await users_collection.find_one({"email": user.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
-    await users_collection.insert_one(user.dict())
+    
+    hashed_pwd = hash_password(user.password)
+    user_dict = user.dict()
+    user_dict["password"] = hashed_pwd
+    
+    await users_collection.insert_one(user_dict)
     return {"message": "User registered successfully"}
 
 @app.post("/api/login")
 async def login_user(login_data: LoginData):
-    user = await users_collection.find_one({
-        "email": login_data.email,
-        "password": login_data.password
-    })
-    if user:
+    user = await users_collection.find_one({"email": login_data.email})
+    if user and verify_password(login_data.password, user["password"]):
         return {"user": {"name": user["name"], "email": user["email"]}}
     raise HTTPException(status_code=401, detail="Invalid email or password")
 
 @app.post("/book", response_model=BookingWithId)
 async def book_slot(booking: Booking):
     booking_id = str(uuid4())
-    booking_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    booking_time = datetime.now(timezone.utc).isoformat()
     new_booking = BookingWithId(id=booking_id, booking_time=booking_time, **booking.dict())
     await bookings_collection.insert_one(new_booking.dict())
     return new_booking
