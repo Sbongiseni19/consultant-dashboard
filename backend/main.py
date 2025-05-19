@@ -9,6 +9,7 @@ from pydantic import BaseModel, EmailStr, Field
 from motor.motor_asyncio import AsyncIOMotorClient
 from passlib.context import CryptContext
 import uvicorn
+from pymongo import MongoClient
 from dotenv import load_dotenv
 
 # Load environment variables early
@@ -16,6 +17,8 @@ load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI()
+
+client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=False)
 
 # Add CORS middleware with better allowed origins (no trailing slash)
 app.add_middleware(
@@ -33,6 +36,8 @@ app.add_middleware(
 # Setup templates directory (adjust if running from different working directory)
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
+
+
 
 # MongoDB setup
 MONGO_URI = os.getenv("MONGO_URI")
