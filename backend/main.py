@@ -9,11 +9,10 @@ from pydantic import BaseModel, EmailStr, Field
 from motor.motor_asyncio import AsyncIOMotorClient
 from passlib.context import CryptContext
 import uvicorn
+from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
-from fastapi import Request
 from dotenv import load_dotenv
-from fastapi.exceptions import RequestValidationError
 
 # Load environment variables early (locally)
 load_dotenv()
@@ -26,6 +25,7 @@ if not MONGO_URI:
 
 # Initialize FastAPI app
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Async MongoDB setup
 client = AsyncIOMotorClient(MONGO_URI)
@@ -34,7 +34,6 @@ client = AsyncIOMotorClient(MONGO_URI)
 try:
     db = client.get_default_database()
 except Exception:
-    # fallback to explicit db name if get_default_database fails
     db = client["banking_db"]
 
 print("Connected to MongoDB database:", db.name)
@@ -42,7 +41,7 @@ print("Connected to MongoDB database:", db.name)
 users_collection = db["users"]
 bookings_collection = db["bookings"]
 
-# Add CORS middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -51,21 +50,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Setup templates directory
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Setup templates directory (FIXED)
+base_dir = os.getcwd()  # This safely points to current project root
 templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# Exception handler
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    print(f"Validation error for request {request.url}: {exc.errors()}")
-    return JSONResponse(
-        status_code=422,
-        content={"detail": exc.errors()},
-    )
-
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     print(f"\n🔴 Validation error at: {request.url}")
     print("🛠️ Error details:")
