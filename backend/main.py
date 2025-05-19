@@ -1,12 +1,12 @@
-﻿import json
-import os
+﻿import os
+from uuid import uuid4
+from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from uuid import uuid4
-from datetime import datetime
+from motor.motor_asyncio import AsyncIOMotorClient
 import uvicorn
 
 # Initialize FastAPI app
@@ -24,9 +24,12 @@ app.add_middleware(
 # Setup templates directory
 templates = Jinja2Templates(directory="templates")
 
-# File paths
-USER_DATA_FILE = "users.json"
-BOOKING_DATA_FILE = "bookings.json"
+# MongoDB setup
+MONGO_URI = os.getenv("MONGO_URI")
+client = AsyncIOMotorClient(MONGO_URI)
+db = client["banking_db"]
+users_collection = db["users"]
+bookings_collection = db["bookings"]
 
 # Models
 class User(BaseModel):
@@ -49,45 +52,7 @@ class BookingWithId(Booking):
     id: str
     booking_time: str
 
-# In-memory storage
-bookings = []
-users = []
-
-def load_data():
-    global bookings, users
-    # Load users
-    if os.path.exists(USER_DATA_FILE):
-        with open(USER_DATA_FILE) as f:
-            try:
-                users = json.load(f)
-            except:
-                users = []
-    else:
-        users = []
-
-    # Add default admin
-    admin_exists = any(u["email"] == "admin@gmail.com" for u in users)
-    if not admin_exists:
-        users.append({
-            "name": "Admin",
-            "email": "admin@gmail.com",
-            "password": "123"
-        })
-        save_data()
-
-    # Load bookings
-    if os.path.exists(BOOKING_DATA_FILE):
-        with open(BOOKING_DATA_FILE) as f:
-            try:
-                bookings = json.load(f)
-            except:
-                bookings = []
-
-def save_data():
-    with open(USER_DATA_FILE, 'w') as f:
-        json.dump(users, f)
-    with open(BOOKING_DATA_FILE, 'w') as f:
-        json.dump(bookings, f)
+# Routes
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
@@ -111,17 +76,20 @@ async def register_page(request: Request):
 
 @app.post("/api/register")
 async def register_user(user: User):
-    if any(u["email"] == user.email for u in users):
+    existing = await users_collection.find_one({"email": user.email})
+    if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
-    users.append(user.dict())
-    save_data()
+    await users_collection.insert_one(user.dict())
     return {"message": "User registered successfully"}
 
 @app.post("/api/login")
 async def login_user(login_data: LoginData):
-    for user in users:
-        if user["email"] == login_data.email and user["password"] == login_data.password:
-            return {"user": {"name": user["name"], "email": user["email"]}}
+    user = await users_collection.find_one({
+        "email": login_data.email,
+        "password": login_data.password
+    })
+    if user:
+        return {"user": {"name": user["name"], "email": user["email"]}}
     raise HTTPException(status_code=401, detail="Invalid email or password")
 
 @app.post("/book", response_model=BookingWithId)
@@ -129,31 +97,29 @@ async def book_slot(booking: Booking):
     booking_id = str(uuid4())
     booking_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_booking = BookingWithId(id=booking_id, booking_time=booking_time, **booking.dict())
-    bookings.append(new_booking.dict())
-    save_data()
+    await bookings_collection.insert_one(new_booking.dict())
     return new_booking
 
 @app.get("/bookings", response_model=list[BookingWithId])
 async def get_bookings():
-    return bookings
+    bookings_cursor = bookings_collection.find()
+    result = []
+    async for booking in bookings_cursor:
+        result.append(BookingWithId(**booking))
+    return result
 
 @app.delete("/bookings/{booking_id}", response_model=BookingWithId)
 async def delete_booking(booking_id: str):
-    global bookings
-    booking = next((b for b in bookings if b["id"] == booking_id), None)
-    if booking is None:
+    result = await bookings_collection.find_one_and_delete({"id": booking_id})
+    if not result:
         raise HTTPException(status_code=404, detail="Booking not found")
-    bookings = [b for b in bookings if b["id"] != booking_id]
-    save_data()
-    return booking
+    return BookingWithId(**result)
 
 @app.post("/logout")
 async def logout():
     return JSONResponse(content={"message": "Logged out successfully"})
 
-# Load data at startup
-load_data()
-
+# Start server
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
