@@ -25,7 +25,7 @@ if not MONGO_URI:
 
 # Initialize FastAPI app
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Async MongoDB setup
 client = AsyncIOMotorClient(MONGO_URI)
