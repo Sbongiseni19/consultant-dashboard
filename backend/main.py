@@ -1,34 +1,36 @@
 ﻿import os
 from uuid import uuid4
 from datetime import datetime, timezone
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from motor.motor_asyncio import AsyncIOMotorClient
 from passlib.context import CryptContext
 import uvicorn
 from dotenv import load_dotenv
 
-# Initialize FastAPI app
-app = FastAPI()
+# Load environment variables early
 load_dotenv()
 
-# Add CORS middleware
+# Initialize FastAPI app
+app = FastAPI()
+
+# Add CORS middleware with better allowed origins (no trailing slash)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://127.0.0.1:8000",  # local frontend
         "http://localhost:8000",  # fallback
-        "https://mybankingapp-ed37f0d6c39a.herokuapp.com/",  # add this if deploying frontend
+        "https://mybankingapp-ed37f0d6c39a.herokuapp.com",  # deployed frontend URL without trailing slash
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Setup templates directory
+# Setup templates directory (adjust if running from different working directory)
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
@@ -50,29 +52,28 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-# Models
+# Models with validation improvements
 class User(BaseModel):
-    name: str
-    email: str
-    password: str
+    name: str = Field(..., min_length=1, max_length=100)
+    email: EmailStr
+    password: str = Field(..., min_length=6)
 
 class LoginData(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 class Booking(BaseModel):
-    name: str
-    id_number: str
-    email: str
-    selected_bank: str
-    selected_service: str
+    name: str = Field(..., min_length=1, max_length=100)
+    id_number: str = Field(..., min_length=6, max_length=20)
+    email: EmailStr
+    selected_bank: str = Field(..., min_length=1)
+    selected_service: str = Field(..., min_length=1)
 
 class BookingWithId(Booking):
     id: str
     booking_time: str
 
 # Routes
-
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -93,16 +94,16 @@ async def dashboard_page(request: Request):
 async def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
-@app.post("/api/register")
+@app.post("/api/register", status_code=status.HTTP_201_CREATED)
 async def register_user(user: User):
     existing = await users_collection.find_one({"email": user.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
-    
+
     hashed_pwd = hash_password(user.password)
     user_dict = user.dict()
     user_dict["password"] = hashed_pwd
-    
+
     await users_collection.insert_one(user_dict)
     return {"message": "User registered successfully"}
 
@@ -113,7 +114,7 @@ async def login_user(login_data: LoginData):
         return {"user": {"name": user["name"], "email": user["email"]}}
     raise HTTPException(status_code=401, detail="Invalid email or password")
 
-@app.post("/book", response_model=BookingWithId)
+@app.post("/book", response_model=BookingWithId, status_code=status.HTTP_201_CREATED)
 async def book_slot(booking: Booking):
     booking_id = str(uuid4())
     booking_time = datetime.now(timezone.utc).isoformat()
@@ -140,7 +141,7 @@ async def delete_booking(booking_id: str):
 async def logout():
     return JSONResponse(content={"message": "Logged out successfully"})
 
-# Start server
+# Start server (only when running locally)
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)

@@ -11,4 +11,10 @@ passlib==1.7.4
 email_validator==2.2.0
 dnspython==2.7.0
 python-dotenv
+fastapi
+uvicorn[standard]
+motor
+passlib[bcrypt]
+python-dotenv
+jinja2
 
