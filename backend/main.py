@@ -9,47 +9,58 @@ from pydantic import BaseModel, EmailStr, Field
 from motor.motor_asyncio import AsyncIOMotorClient
 from passlib.context import CryptContext
 import uvicorn
-from pymongo import MongoClient
 from dotenv import load_dotenv
 
-# Load environment variables early
+# Load environment variables early (locally)
 load_dotenv()
+print("MONGO_URI loaded:", os.getenv("MONGO_URI"))
+
+# Get MongoDB URI before using it
+MONGO_URI = os.getenv("MONGO_URI")
+if not MONGO_URI:
+    raise RuntimeError("MONGO_URI environment variable is not set.")
 
 # Initialize FastAPI app
 app = FastAPI()
 
-client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=False)
+# Async MongoDB setup
+client = AsyncIOMotorClient(MONGO_URI)
 
-# Add CORS middleware with better allowed origins (no trailing slash)
+# Use the database specified in the URI, or fallback
+try:
+    db = client.get_default_database()
+except Exception:
+    # fallback to explicit db name if get_default_database fails
+    db = client["banking_db"]
+
+print("Connected to MongoDB database:", db.name)
+
+users_collection = db["users"]
+bookings_collection = db["bookings"]
+
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:8000",  # local frontend
-        "http://localhost:8000",  # fallback
-        "https://mybankingapp-ed37f0d6c39a.herokuapp.com",  # deployed frontend URL without trailing slash
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Setup templates directory (adjust if running from different working directory)
+# Setup templates directory
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
-
-
-# MongoDB setup
-MONGO_URI = os.getenv("MONGO_URI")
-if not MONGO_URI:
-    raise RuntimeError("MONGO_URI environment variable is not set.")
-client = AsyncIOMotorClient(MONGO_URI)
-db = client["banking_db"]
-users_collection = db["users"]
-bookings_collection = db["bookings"]
-
-# Password hashing context
+# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+@app.options("/{rest_of_path:path}")
+async def preflight_handler():
+    return JSONResponse(content={}, headers={
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE",
+        "Access-Control-Allow-Headers": "*",
+    })
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
@@ -57,7 +68,7 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-# Models with validation improvements
+# Models
 class User(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
@@ -146,7 +157,14 @@ async def delete_booking(booking_id: str):
 async def logout():
     return JSONResponse(content={"message": "Logged out successfully"})
 
-# Start server (only when running locally)
+# **New test route to check DB connection and collections count**
+@app.get("/api/test-db")
+async def test_db():
+    users_count = await users_collection.count_documents({})
+    bookings_count = await bookings_collection.count_documents({})
+    return {"users_count": users_count, "bookings_count": bookings_count}
+
+# Start locally
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
