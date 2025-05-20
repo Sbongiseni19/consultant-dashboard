@@ -1,209 +1,159 @@
-﻿import os
-from uuid import uuid4
-from datetime import datetime, timezone
-from fastapi import FastAPI, HTTPException, Request, status
+﻿import json
+import os
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, EmailStr, Field, validator
-from motor.motor_asyncio import AsyncIOMotorClient
-from passlib.context import CryptContext
+from pydantic import BaseModel
+from uuid import uuid4
+from datetime import datetime
 import uvicorn
-from fastapi.staticfiles import StaticFiles
-from fastapi.exceptions import RequestValidationError
-from dotenv import load_dotenv
-import logging
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Load environment variables early (locally)
-load_dotenv()
-logger.info("Loading environment variables...")
-
-MONGO_URI = os.getenv("MONGO_URI")
-if not MONGO_URI:
-    logger.error("MONGO_URI environment variable is not set!")
-    raise RuntimeError("MONGO_URI environment variable is not set.")
 
 # Initialize FastAPI app
-app = FastAPI(title="Booking API", debug=True)
+app = FastAPI()
 
-# Enhanced CORS configuration
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"]
 )
 
 # Setup templates directory
-base_dir = os.getcwd()
-templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
+templates = Jinja2Templates(directory="templates")
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# File paths
+USER_DATA_FILE = "users.json"
+BOOKING_DATA_FILE = "bookings.json"
 
-# MongoDB async client & DB setup with connection verification
-try:
-    client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-    db = client.get_default_database()
-    logger.info(f"Connected to MongoDB database: {db.name}")
-except Exception as e:
-    logger.error(f"Failed to connect to MongoDB: {str(e)}")
-    raise
-
-users_collection = db["users"]
-bookings_collection = db["bookings"]
-
-# Middleware to log requests and responses
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    logger.info(f"Incoming request: {request.method} {request.url}")
-    try:
-        if request.method in ["POST", "PUT", "PATCH"]:
-            body = await request.body()
-            logger.debug(f"Request body: {body.decode()}")
-    except Exception:
-        pass
-    
-    response = await call_next(request)
-    
-    response.headers.update({
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Methods": "*",
-        "Access-Control-Allow-Headers": "*",
-    })
-    
-    return response
-
-# Enhanced exception handler
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    errors = exc.errors()
-    logger.error(f"Validation error: {errors}")
-    return JSONResponse(
-        status_code=422,
-        content={
-            "detail": errors,
-            "body": await request.body() if request.method in ["POST", "PUT"] else None
-        },
-    )
-
-@app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal server error"},
-    )
-
-# Password validation function
-def validate_password(password: str) -> str:
-    if len(password) < 6:
-        raise ValueError("Password must be at least 6 characters long")
-    return password
-
-# Pydantic models with enhanced validation
+# Models
 class User(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100, example="John Doe")
-    email: EmailStr = Field(..., example="john@example.com")
-    password: str = Field(..., min_length=6, example="securepassword123")
-    
-    @validator('password')
-    def password_complexity(cls, v):
-        return validate_password(v)
+    name: str
+    email: str
+    password: str
 
 class LoginData(BaseModel):
-    email: EmailStr = Field(..., example="john@example.com")
-    password: str = Field(..., example="securepassword123")
+    email: str
+    password: str
 
 class Booking(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100, example="John Doe")
-    id_number: str = Field(..., min_length=6, max_length=20, example="A123456")
-    email: EmailStr = Field(..., example="john@example.com")
-    selected_bank: str = Field(..., min_length=1, example="Bank of America")
-    selected_service: str = Field(..., min_length=1, example="Loan Consultation")
+    name: str
+    id_number: str
+    email: str
+    selected_bank: str
+    selected_service: str
 
 class BookingWithId(Booking):
-    id: str = Field(..., example="550e8400-e29b-41d4-a716-446655440000")
-    booking_time: str = Field(..., example="2023-01-01T12:00:00Z")
+    id: str
+    booking_time: str
 
-# Database health check endpoint
-@app.get("/api/health")
-async def health_check():
-    try:
-        # Test database connection
-        await client.admin.command('ping')
-        return {
-            "status": "healthy",
-            "database": "connected",
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-    except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-        raise HTTPException(
-            status_code=503,
-            detail={"status": "unhealthy", "error": str(e)}
-        )
+# In-memory storage
+bookings = []
+users = []
 
-# Enhanced registration endpoint
-@app.post("/api/register", status_code=status.HTTP_201_CREATED)
-async def register_user(user: User):
-    logger.info(f"Registration attempt for email: {user.email}")
-    
-    try:
-        # Check for existing user
-        existing = await users_collection.find_one({"email": user.email})
-        if existing:
-            logger.warning(f"Email already registered: {user.email}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "error": "Email already registered",
-                    "suggestion": "Try logging in or use a different email"
-                }
-            )
+def load_data():
+    global bookings, users
+    # Load users
+    if os.path.exists(USER_DATA_FILE):
+        with open(USER_DATA_FILE) as f:
+            try:
+                users = json.load(f)
+            except:
+                users = []
+    else:
+        users = []
 
-        # Hash password and prepare user document
-        hashed_pwd = hash_password(user.password)
-        user_dict = user.dict(exclude={"password"})
-        user_dict.update({
-            "password": hashed_pwd,
-            "created_at": datetime.now(timezone.utc),
-            "updated_at": datetime.now(timezone.utc)
+    # Add default admin
+    admin_exists = any(u["email"] == "admin@gmail.com" for u in users)
+    if not admin_exists:
+        users.append({
+            "name": "Admin",
+            "email": "admin@gmail.com",
+            "password": "123"
         })
+        save_data()
 
-        # Insert new user
-        result = await users_collection.insert_one(user_dict)
-        logger.info(f"New user created with ID: {result.inserted_id}")
-        
-        return {
-            "message": "User registered successfully",
-            "user": {
-                "name": user.name,
-                "email": user.email
-            }
-        }
-    except Exception as e:
-        logger.error(f"Registration failed: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Registration failed due to server error"
-        )
+    # Load bookings
+    if os.path.exists(BOOKING_DATA_FILE):
+        with open(BOOKING_DATA_FILE) as f:
+            try:
+                bookings = json.load(f)
+            except:
+                bookings = []
 
-# The rest of your endpoints (login, bookings, etc.) can follow the same enhanced pattern...
+def save_data():
+    with open(USER_DATA_FILE, 'w') as f:
+        json.dump(users, f)
+    with open(BOOKING_DATA_FILE, 'w') as f:
+        json.dump(bookings, f)
+
+@app.get("/", response_class=HTMLResponse)
+def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/dashboard-consultant", response_class=HTMLResponse)
+async def consultant_dashboard_page(request: Request):
+    return templates.TemplateResponse("dashboard_consultant.html", {"request": request})
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_page(request: Request):
+    return templates.TemplateResponse("user_dashboard.html", {"request": request})
+
+@app.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+@app.post("/api/register")
+async def register_user(user: User):
+    if any(u["email"] == user.email for u in users):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    users.append(user.dict())
+    save_data()
+    return {"message": "User registered successfully"}
+
+@app.post("/api/login")
+async def login_user(login_data: LoginData):
+    for user in users:
+        if user["email"] == login_data.email and user["password"] == login_data.password:
+            return {"user": {"name": user["name"], "email": user["email"]}}
+    raise HTTPException(status_code=401, detail="Invalid email or password")
+
+@app.post("/book", response_model=BookingWithId)
+async def book_slot(booking: Booking):
+    booking_id = str(uuid4())
+    booking_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    new_booking = BookingWithId(id=booking_id, booking_time=booking_time, **booking.dict())
+    bookings.append(new_booking.dict())
+    save_data()
+    return new_booking
+
+@app.get("/bookings", response_model=list[BookingWithId])
+async def get_bookings():
+    return bookings
+
+@app.delete("/bookings/{booking_id}", response_model=BookingWithId)
+async def delete_booking(booking_id: str):
+    global bookings
+    booking = next((b for b in bookings if b["id"] == booking_id), None)
+    if booking is None:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    bookings = [b for b in bookings if b["id"] != booking_id]
+    save_data()
+    return booking
+
+@app.post("/logout")
+async def logout():
+    return JSONResponse(content={"message": "Logged out successfully"})
+
+# Load data at startup
+load_data()
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=port,
-        log_config=None,  # Use default logging
-        reload=True
-    )
+    uvicorn.run(app, host="0.0.0.0", port=port)
