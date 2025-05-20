@@ -14,6 +14,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from dotenv import load_dotenv
 import pymongo
+from pymongo import MongoClient
 
 # Load environment variables early (locally)
 load_dotenv()
@@ -28,10 +29,9 @@ if not MONGO_URI:
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
-client = pymongo.MongoClient("mongodb+srv://banking_user:Mpendulo00%40@bankingappdb.4zq89p5.mongodb.net/BankingAppDB?retryWrites=true&w=majority&appName=BankingAppDB", tls=True)
-db = client["BankingAppDB"]
-# Async MongoDB setup
-client = AsyncIOMotorClient(MONGO_URI)
+uri = "mongodb+srv://banking_user:Mpendulo00%40@bankingappdb.4zq89p5.mongodb.net/BankingAppDB?retryWrites=true&w=majority&appName=BankingAppDB"
+client = MongoClient(uri)
+db = client.BankingAppDB
 
 # Use the database specified in the URI, or fallback
 try:
