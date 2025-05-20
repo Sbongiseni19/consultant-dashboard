@@ -11,38 +11,18 @@ from passlib.context import CryptContext
 import uvicorn
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import PlainTextResponse
 from dotenv import load_dotenv
-import pymongo
-from pymongo import MongoClient
 
 # Load environment variables early (locally)
 load_dotenv()
 print("MONGO_URI loaded:", os.getenv("MONGO_URI"))
 
-# Get MongoDB URI before using it
 MONGO_URI = os.getenv("MONGO_URI")
 if not MONGO_URI:
     raise RuntimeError("MONGO_URI environment variable is not set.")
 
 # Initialize FastAPI app
 app = FastAPI()
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-
-uri = "mongodb+srv://banking_user:Mpendulo00%40@bankingappdb.4zq89p5.mongodb.net/BankingAppDB?retryWrites=true&w=majority&appName=BankingAppDB"
-client = MongoClient(uri)
-db = client.BankingAppDB
-
-# Use the database specified in the URI, or fallback
-try:
-    db = client.get_default_database()
-except Exception:
-    db = client["banking_db"]
-
-print("Connected to MongoDB database:", db.name)
-
-users_collection = db["users"]
-bookings_collection = db["bookings"]
 
 # CORS
 app.add_middleware(
@@ -53,18 +33,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Setup templates directory (FIXED)
-base_dir = os.getcwd()  # This safely points to current project root
+# Setup templates directory
+base_dir = os.getcwd()
 templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Exception handler
+# MongoDB async client & DB setup
+client = AsyncIOMotorClient(MONGO_URI)
+db = client.get_default_database()
+
+users_collection = db["users"]
+bookings_collection = db["bookings"]
+
+# Exception handler for validation errors
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     print(f"\n🔴 Validation error at: {request.url}")
-    print("🛠️ Error details:")
     for error in exc.errors():
         print(f"  - {error['loc'][-1]}: {error['msg']}")
     return JSONResponse(
@@ -86,7 +72,7 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-# Models
+# Pydantic models
 class User(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
@@ -175,14 +161,13 @@ async def delete_booking(booking_id: str):
 async def logout():
     return JSONResponse(content={"message": "Logged out successfully"})
 
-# **New test route to check DB connection and collections count**
 @app.get("/api/test-db")
 async def test_db():
     users_count = await users_collection.count_documents({})
     bookings_count = await bookings_collection.count_documents({})
     return {"users_count": users_count, "bookings_count": bookings_count}
 
-# Start locally
+# Run the app
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
