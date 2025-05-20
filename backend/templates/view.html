@@ -1,0 +1,249 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consultant Dashboard - View Bookings</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eaeaea;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        button {
+            margin-right: 5px;
+            padding: 6px 12px;
+            border: none;
+            background-color: #2980b9;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #1c6690;
+            }
+
+        .back-btn {
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+                thead tr {
+                    display: none;
+                }
+
+            tr {
+                margin-bottom: 15px;
+                background: #fff;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            td {
+                position: relative;
+                padding-left: 50%;
+                border-bottom: none;
+            }
+
+                td::before {
+                    content: attr(data-label);
+                    position: absolute;
+                    left: 16px;
+                    top: 12px;
+                    font-weight: bold;
+                    color: #333;
+                }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dashboard -->
+    <div class="container" id="dashboardView">
+        <input type="text" id="searchInput" placeholder="Search by name or email..." onkeyup="filterTable()" style="margin-bottom: 1rem; padding: 10px; width: 100%; max-width: 300px; border-radius: 8px; border: 1px solid #ccc;">
+
+        <div style="margin-bottom: 1rem;">
+            <button onclick="exportToPDF()">Export to PDF</button>
+            <button onclick="exportToExcel()">Export to Excel</button>
+        </div>
+
+        <h1>Consultant Dashboard</h1>
+        <h2>Bookings</h2>
+        <table id="bookingsTable">
+            <thead>
+                <tr>
+                    <th>Name & Surname</th>
+                    <th>ID Number</th>
+                    <th>Email</th>
+                    <th>Bank</th>
+                    <th>Service</th>
+                    <th>Booking Time</th>
+                    <th>Info</th>
+                    <th>Checked</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Profile View -->
+    <div class="container" id="profileView" style="display: none;">
+        <h1>User Profile</h1>
+        <p><strong>Name:</strong> <span id="profileName"></span></p>
+        <p><strong>ID Number:</strong> <span id="profileID"></span></p>
+        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+        <p><strong>Bank:</strong> <span id="profileBank"></span></p>
+        <p><strong>Service:</strong> <span id="profileService"></span></p>
+        <p><strong>Booking Time:</strong> <span id="profileBookingTime"></span></p>
+        <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+    </div>
+
+    <script>
+        let bookingsData = [];
+
+        async function fetchBookings() {
+            try {
+                const response = await fetch('https://mybankingapp-ed37f0d6c39a.herokuapp.com/bookings');
+                const data = await response.json();
+
+                if (response.ok) {
+                    bookingsData = data;
+                    const tableBody = document.querySelector("#bookingsTable tbody");
+                    tableBody.innerHTML = "";
+
+                    data.forEach((booking, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                                <td data-label="Name">${booking.name}</td>
+                                <td data-label="ID Number">${booking.id_number}</td>
+                                <td data-label="Email">${booking.email}</td>
+                                <td data-label="Bank">${booking.bank}</td>
+                                <td data-label="Service">${booking.service}</td>
+                                <td data-label="Booking Time">${booking.booking_time}</td>
+                                <td data-label="Info">
+                                    <button onclick="viewProfile(${index})">View</button>
+                                    <button onclick="updateStatus(${index})">Update</button>
+                                    <button onclick="deleteBooking(${index})">Delete</button>
+
+                                </td>
+                                <td data-label="Checked" id="checked-${index}">Pending</td>
+                            `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    console.error("Error fetching bookings");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function viewProfile(index) {
+            const user = bookingsData[index];
+
+            document.getElementById("profileName").innerText = user.name;
+            document.getElementById("profileID").innerText = user.id_number;
+            document.getElementById("profileEmail").innerText = user.email;
+            document.getElementById("profileBank").innerText = user.bank;
+            document.getElementById("profileService").innerText = user.service;
+            document.getElementById("profileBookingTime").innerText = user.booking_time; // Show booking time in profile
+
+            document.getElementById("dashboardView").style.display = "none";
+            document.getElementById("profileView").style.display = "block";
+        }
+
+        function goBack() {
+            document.getElementById("dashboardView").style.display = "block";
+            document.getElementById("profileView").style.display = "none";
+        }
+
+        function updateStatus(index) {
+            const cell = document.getElementById(`checked-${index}`);
+            if (cell.innerText === 'Pending') {
+                cell.innerText = 'Checked';
+            }
+        }
+
+        function deleteBooking(index) {
+            if (confirm("Are you sure you want to delete this booking?")) {
+                bookingsData.splice(index, 1);
+                renderTable(bookingsData);
+            }
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text("Bookings", 10, 10);
+            let y = 20;
+
+            bookingsData.forEach((b, i) => {
+                doc.text(`${i + 1}. ${b.name}, ${b.id_number}, ${b.email}, ${b.bank}, ${b.service}`, 10, y);
+                y += 10;
+            });
+
+            doc.save("bookings.pdf");
+        }
+
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(bookingsData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Bookings");
+            XLSX.writeFile(wb, "bookings.xlsx");
+        }
+
+        setInterval(fetchBookings, 30000);
+
+        fetchBookings();
+    </script>
+</body>
+</html>
