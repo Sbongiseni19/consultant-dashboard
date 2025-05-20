@@ -28,7 +28,7 @@ if not MONGO_URI:
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
-client = pymongo.MongoClient("mongodb+srv://banking_user:Mpendulo00%40@bankingappdb.4zq89p5.mongodb.net/mydbname?retryWrites=true&w=majority&appName=BankingAppDB", tls=True)
+client = pymongo.MongoClient("mongodb+srv://banking_user:Mpendulo00%40@bankingappdb.4zq89p5.mongodb.net/BankingAppDB?retryWrites=true&w=majority&appName=BankingAppDB", tls=True)
 db = client["BankingAppDB"]
 # Async MongoDB setup
 client = AsyncIOMotorClient(MONGO_URI)
